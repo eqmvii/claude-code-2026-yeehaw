@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sub-Tac-Toe</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #00703A;
+    font-family: 'Arial Black', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    color: #fff;
+  }
+
+  h1 {
+    font-size: 3rem;
+    letter-spacing: 2px;
+    text-shadow: 3px 3px 0 #004d28;
+    margin-bottom: 4px;
+    color: #FFD700;
+  }
+
+  .tagline {
+    font-size: 0.95rem;
+    color: #b8f0d0;
+    margin-bottom: 24px;
+    font-style: italic;
+    font-weight: normal;
+  }
+
+  /* Bread top and bottom */
+  .bread {
+    width: 360px;
+    height: 40px;
+    background: linear-gradient(180deg, #c8860a 0%, #e8a020 60%, #f5c060 100%);
+    border-radius: 50% 50% 0 0 / 30px 30px 0 0;
+    box-shadow: 0 -4px 8px rgba(0,0,0,0.3);
+    position: relative;
+  }
+  .bread.bottom {
+    border-radius: 0 0 50% 50% / 0 0 30px 30px;
+    background: linear-gradient(180deg, #f5c060 0%, #e8a020 40%, #c8860a 100%);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+  }
+
+  .sesame {
+    position: absolute;
+    background: #f0d88a;
+    border-radius: 50%;
+    width: 7px; height: 4px;
+    opacity: 0.8;
+  }
+
+  .sandwich-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .filling {
+    width: 360px;
+    background: #fff8e7;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  /* Lettuce strip */
+  .lettuce {
+    width: 360px;
+    height: 14px;
+    background: repeating-linear-gradient(
+      90deg,
+      #4caf50 0px, #4caf50 12px,
+      #66bb6a 12px, #66bb6a 20px,
+      #81c784 20px, #81c784 28px,
+      #4caf50 28px
+    );
+    clip-path: polygon(
+      0% 100%, 2% 30%, 5% 80%, 8% 20%, 11% 70%, 14% 10%, 17% 60%,
+      20% 0%, 23% 50%, 26% 15%, 29% 65%, 32% 5%, 35% 55%, 38% 20%,
+      41% 70%, 44% 10%, 47% 60%, 50% 0%, 53% 50%, 56% 15%, 59% 65%,
+      62% 5%, 65% 55%, 68% 20%, 71% 70%, 74% 10%, 77% 60%, 80% 0%,
+      83% 50%, 86% 15%, 89% 65%, 92% 5%, 95% 55%, 98% 20%, 100% 50%,
+      100% 100%
+    );
+  }
+
+  /* The game board */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 6px;
+    background: #c8860a;
+    padding: 6px;
+    border-left: 4px solid #a06808;
+    border-right: 4px solid #a06808;
+  }
+
+  .cell {
+    background: #fff8e7;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.8rem;
+    cursor: pointer;
+    transition: background 0.15s;
+    user-select: none;
+    border-radius: 4px;
+  }
+
+  .cell:hover:not(.taken) {
+    background: #ffefc0;
+  }
+
+  .cell.taken { cursor: default; }
+
+  .cell.win-cell {
+    background: #FFD700;
+    animation: pulse 0.4s ease;
+  }
+
+  @keyframes pulse {
+    0%   { transform: scale(1); }
+    50%  { transform: scale(1.12); }
+    100% { transform: scale(1); }
+  }
+
+  /* Tomato strip */
+  .tomato-strip {
+    width: 360px;
+    height: 10px;
+    background: repeating-linear-gradient(
+      90deg,
+      #e53935 0px, #e53935 28px,
+      #ef5350 28px, #ef5350 36px,
+      #e53935 36px
+    );
+    opacity: 0.85;
+  }
+
+  .status-bar {
+    width: 360px;
+    background: #004d28;
+    padding: 10px 16px;
+    text-align: center;
+    font-size: 1.1rem;
+    border-left: 4px solid #a06808;
+    border-right: 4px solid #a06808;
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .scoreboard {
+    display: flex;
+    gap: 20px;
+    margin: 14px 0 6px;
+    font-size: 0.95rem;
+  }
+
+  .score-box {
+    background: #004d28;
+    border: 2px solid #FFD700;
+    border-radius: 8px;
+    padding: 6px 18px;
+    text-align: center;
+    min-width: 90px;
+  }
+
+  .score-box .emoji { font-size: 1.5rem; display: block; }
+  .score-box .label { font-size: 0.7rem; color: #b8f0d0; }
+  .score-box .pts { font-size: 1.4rem; color: #FFD700; font-weight: bold; }
+
+  .score-box.active {
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255,255,255,0.4);
+  }
+
+  .draws-box {
+    background: #004d28;
+    border: 2px solid #aaa;
+    border-radius: 8px;
+    padding: 6px 18px;
+    text-align: center;
+    min-width: 70px;
+  }
+
+  .draws-box .label { font-size: 0.7rem; color: #b8f0d0; }
+  .draws-box .pts { font-size: 1.4rem; color: #ccc; font-weight: bold; }
+
+  #resetBtn {
+    margin-top: 14px;
+    padding: 10px 30px;
+    background: #FFD700;
+    color: #004d28;
+    border: none;
+    border-radius: 24px;
+    font-size: 1rem;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 0 #a09000;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+
+  #resetBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #a09000; }
+  #resetBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #a09000; }
+
+  .footer {
+    margin-top: 18px;
+    font-size: 0.7rem;
+    color: #7ec9a0;
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<h1>🥖 Sub-Tac-Toe</h1>
+<p class="tagline">"Eat Fresh. Play Fresh."</p>
+
+<div class="scoreboard">
+  <div class="score-box" id="p1box">
+    <span class="emoji">🥒</span>
+    <span class="label">Pickles (P1)</span>
+    <span class="pts" id="s1">0</span>
+  </div>
+  <div class="draws-box">
+    <span class="label">Draws</span>
+    <span class="pts" id="sd">0</span>
+  </div>
+  <div class="score-box" id="p2box">
+    <span class="emoji">🫒</span>
+    <span class="label">Olives (P2)</span>
+    <span class="pts" id="s2">0</span>
+  </div>
+</div>
+
+<div class="sandwich-wrap">
+  <div class="bread" id="topBread">
+    <div class="sesame" style="top:8px;left:50px"></div>
+    <div class="sesame" style="top:14px;left:90px"></div>
+    <div class="sesame" style="top:6px;left:140px"></div>
+    <div class="sesame" style="top:16px;left:200px"></div>
+    <div class="sesame" style="top:8px;left:250px"></div>
+    <div class="sesame" style="top:14px;left:300px"></div>
+  </div>
+  <div class="lettuce"></div>
+
+  <div class="status-bar" id="status">🥒 Pickle's turn!</div>
+
+  <div class="board" id="board">
+    <div class="cell" data-i="0"></div>
+    <div class="cell" data-i="1"></div>
+    <div class="cell" data-i="2"></div>
+    <div class="cell" data-i="3"></div>
+    <div class="cell" data-i="4"></div>
+    <div class="cell" data-i="5"></div>
+    <div class="cell" data-i="6"></div>
+    <div class="cell" data-i="7"></div>
+    <div class="cell" data-i="8"></div>
+  </div>
+
+  <div class="tomato-strip"></div>
+  <div class="bread bottom"></div>
+</div>
+
+<button id="resetBtn">🥖 New Sub!</button>
+<p class="footer">🥒 = Player 1 &nbsp;|&nbsp; 🫒 = Player 2</p>
+
+<script>
+const WINS = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+const ICONS = ['🥒','🫒'];
+
+let board, current, over, scores = [0,0,0];
+
+function init() {
+  board = Array(9).fill(null);
+  current = 0;
+  over = false;
+  document.querySelectorAll('.cell').forEach(c => {
+    c.textContent = '';
+    c.classList.remove('taken','win-cell');
+  });
+  updateStatus();
+  updateScoreHighlight();
+}
+
+function updateStatus(msg) {
+  document.getElementById('status').textContent =
+    msg || `${ICONS[current]} ${current===0?'Pickle':'Olive'}'s turn!`;
+}
+
+function updateScoreHighlight() {
+  document.getElementById('p1box').classList.toggle('active', current===0 && !over);
+  document.getElementById('p2box').classList.toggle('active', current===1 && !over);
+}
+
+function updateScoreDisplay() {
+  document.getElementById('s1').textContent = scores[0];
+  document.getElementById('s2').textContent = scores[1];
+  document.getElementById('sd').textContent = scores[2];
+}
+
+function checkWin() {
+  for (const [a,b,c] of WINS) {
+    if (board[a] !== null && board[a]===board[b] && board[a]===board[c]) return [a,b,c];
+  }
+  return null;
+}
+
+document.getElementById('board').addEventListener('click', e => {
+  const cell = e.target.closest('.cell');
+  if (!cell || over) return;
+  const i = +cell.dataset.i;
+  if (board[i]) return;
+
+  board[i] = current;
+  cell.textContent = ICONS[current];
+  cell.classList.add('taken');
+
+  const win = checkWin();
+  if (win) {
+    over = true;
+    win.forEach(idx => document.querySelector(`[data-i="${idx}"]`).classList.add('win-cell'));
+    scores[current]++;
+    updateScoreDisplay();
+    updateStatus(`${ICONS[current]} ${current===0?'Pickles':'Olives'} win! Fresh! 🥖`);
+    document.getElementById('p1box').classList.remove('active');
+    document.getElementById('p2box').classList.remove('active');
+    return;
+  }
+
+  if (board.every(v => v !== null)) {
+    over = true;
+    scores[2]++;
+    updateScoreDisplay();
+    updateStatus('🥙 It\'s a wrap! Draw game!');
+    document.getElementById('p1box').classList.remove('active');
+    document.getElementById('p2box').classList.remove('active');
+    return;
+  }
+
+  current = 1 - current;
+  updateStatus();
+  updateScoreHighlight();
+});
+
+document.getElementById('resetBtn').addEventListener('click', init);
+
+init();
+</script>
+</body>
+</html>
