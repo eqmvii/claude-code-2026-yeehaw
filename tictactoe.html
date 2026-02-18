@@ -219,6 +219,28 @@
   #resetBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #a09000; }
   #resetBtn:active { transform: translateY(2px); box-shadow: 0 2px 0 #a09000; }
 
+  #meltBtn {
+    margin-top: 8px;
+    padding: 10px 30px;
+    background: #cc00ff;
+    color: #fff;
+    border: none;
+    border-radius: 24px;
+    font-size: 1rem;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-weight: 900;
+    cursor: pointer;
+    letter-spacing: 1px;
+    box-shadow: 0 4px 0 #7700aa;
+    transition: transform 0.1s, box-shadow 0.1s;
+  }
+  #meltBtn:hover { transform: translateY(-2px); box-shadow: 0 6px 0 #7700aa; }
+
+  @keyframes hueshift {
+    0%   { filter: hue-rotate(0deg)   saturate(3) brightness(1.2); }
+    100% { filter: hue-rotate(360deg) saturate(3) brightness(1.2); }
+  }
+
   .footer {
     margin-top: 18px;
     font-size: 0.7rem;
@@ -279,6 +301,7 @@
 </div>
 
 <button id="resetBtn">🥖 New Sub!</button>
+<button id="meltBtn">🌀 Melt</button>
 <p class="footer">🥒 = Player 1 &nbsp;|&nbsp; 🫒 = Player 2</p>
 
 <script>
@@ -365,6 +388,39 @@ document.getElementById('board').addEventListener('click', e => {
 });
 
 document.getElementById('resetBtn').addEventListener('click', init);
+
+// Melt button
+let melting = false;
+document.getElementById('meltBtn').addEventListener('click', () => {
+  if (melting) return;
+  melting = true;
+  const btn = document.getElementById('meltBtn');
+  btn.textContent = '😵 MELTING';
+
+  const body = document.body;
+  body.style.animation = 'hueshift 0.4s linear infinite';
+  body.style.transition = 'all 0.3s';
+
+  const els = document.querySelectorAll('*');
+  let t = 0;
+  els.forEach(el => {
+    const delay = Math.random() * 1200;
+    const dur   = 1500 + Math.random() * 2000;
+    const skewX = (Math.random() - 0.5) * 40;
+    const skewY = (Math.random() - 0.5) * 20;
+    const scaleX = 0.4 + Math.random() * 1.4;
+    const scaleY = 0.4 + Math.random() * 2.5;
+    const tx     = (Math.random() - 0.5) * 120;
+    const ty     = 80 + Math.random() * 300;
+    const rot    = (Math.random() - 0.5) * 60;
+    setTimeout(() => {
+      el.style.transition = `transform ${dur}ms cubic-bezier(.2,0,.8,1), opacity ${dur}ms, filter ${dur}ms`;
+      el.style.transform  = `translate(${tx}px, ${ty}px) rotate(${rot}deg) skew(${skewX}deg,${skewY}deg) scale(${scaleX},${scaleY})`;
+      el.style.filter     = `hue-rotate(${Math.random()*360}deg) blur(${Math.random()*4}px)`;
+      el.style.opacity    = (0.1 + Math.random() * 0.5).toString();
+    }, delay);
+  });
+});
 
 init();
 </script>
